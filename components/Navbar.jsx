@@ -1,13 +1,19 @@
-import { FaBars, FaGithub, FaRegBell, FaSearch } from 'react-icons/fa';
+import Link from 'next/link';
+import { AiOutlineSearch } from 'react-icons/ai';
+import { FaBars, FaGithub, FaRegBell } from 'react-icons/fa';
 
 const Navbar = ({ title }) => {
   return (
-    <div className="sticky top-0 navbar justify-between mb-2 shadow-lg bg-neutral text-neutral-content">
-      <button type="button" className="btn btn-square btn-ghost">
+    <div className="sticky top-0 navbar justify-between shadow-lg bg-neutral text-neutral-content">
+      <button type="button" className="btn btn-square btn-ghost md:hidden">
         <FaBars size="1.3rem" />
       </button>
       <div className="hidden px-2 mx-2 lg:flex">
-        <span className="text-lg font-bold">{title}</span>
+        <Link href="/">
+          <a>
+            <span className="text-lg font-bold">{title}</span>
+          </a>
+        </Link>
       </div>
       <div className="flex-1 mx-2 md:mx-6">
         <div className="form-control flex-row w-full">
@@ -20,7 +26,7 @@ const Navbar = ({ title }) => {
             type="submit"
             className="btn btn-square btn-ghost hidden md:flex"
           >
-            <FaSearch size="1.3rem" />
+            <AiOutlineSearch size="1.5rem" />
           </button>
         </div>
       </div>
