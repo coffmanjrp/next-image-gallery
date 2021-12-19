@@ -4,7 +4,7 @@ import { RiHashtag } from 'react-icons/ri';
 
 const Sidebar = () => {
   return (
-    <div className="fixed left-0 w-16' h-screen rounded-box shadow-lg overflow-hidden hidden md:block">
+    <div className="fixed top-16 left-0 w-16' h-screen rounded-box shadow-lg overflow-hidden hidden md:block">
       <ul className="menu mt-2">
         <li>
           <a className="hover:text-secondary">
