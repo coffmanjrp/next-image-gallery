@@ -3,4 +3,8 @@ module.exports = {
   images: {
     domains: ['tailwindcss.com'],
   },
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
 };
