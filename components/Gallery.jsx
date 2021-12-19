@@ -1,5 +1,5 @@
 import Masonry from 'react-masonry-css';
-import { GalleryItem } from '@/components/index';
+import { GalleryItem, Spinner } from '@/components/index';
 import { useFirestore } from '@/hooks/index';
 
 const Gallery = () => {
@@ -12,7 +12,7 @@ const Gallery = () => {
   };
 
   if (loading) {
-    return <h1>Loading</h1>;
+    return <Spinner />;
   }
 
   return (
