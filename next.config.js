@@ -1,7 +1,7 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ['tailwindcss.com'],
+    domains: ['firebasestorage.googleapis.com', 'tailwindcss.com'],
   },
   plugins: {
     tailwindcss: {},
