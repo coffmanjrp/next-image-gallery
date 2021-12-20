@@ -1,10 +1,30 @@
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaBars, FaGithub, FaRegBell } from 'react-icons/fa';
+import { BsPalette2 } from 'react-icons/bs';
+import { ThemeMenu } from '@/components/index';
 
 const Navbar = ({ title }) => {
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const themeMenuRef = useRef();
+
+  useEffect(() => {
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
+
+  const handleClick = (e) => {
+    if (themeMenuRef.current && !themeMenuRef.current.contains(e.target)) {
+      setShowThemeMenu(false);
+    }
+  };
+
   return (
-    <div className="sticky top-0 navbar justify-between shadow-lg bg-neutral text-neutral-content">
+    <div className="sticky top-0 navbar justify-between shadow-lg bg-neutral text-neutral-content z-20">
       <button type="button" className="btn btn-square btn-ghost md:hidden">
         <FaBars size="1.3rem" />
       </button>
@@ -29,6 +49,16 @@ const Navbar = ({ title }) => {
             <AiOutlineSearch size="1.5rem" />
           </button>
         </div>
+      </div>
+      <div ref={themeMenuRef} className="relative">
+        <button
+          type="button"
+          className="btn btn-square btn-ghost"
+          onClick={() => setShowThemeMenu((prevState) => !prevState)}
+        >
+          <BsPalette2 size="1.3rem" />
+        </button>
+        <ThemeMenu {...{ showThemeMenu, setShowThemeMenu }} />
       </div>
       <button type="button" className="btn btn-square btn-ghost">
         <FaRegBell size="1.3rem" />

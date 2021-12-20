@@ -16,7 +16,7 @@ const Gallery = () => {
   }
 
   return (
-    <div className="m-8 ml-32 w-full h-screen">
+    <div className="m-8 md:ml-32 w-full h-screen">
       <Masonry
         breakpointCols={breakpoints}
         className="flex ml-[-0.375rem] w-auto"

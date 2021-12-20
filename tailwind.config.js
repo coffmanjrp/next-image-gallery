@@ -7,8 +7,6 @@ module.exports = {
   theme: {
     extend: {},
   },
-  daisyui: {
-    themes: ['emerald', 'dark', 'forest', 'synthwave'],
-  },
-  plugins: [require('daisyui'), require('@tailwindcss/aspect-ratio')],
+  daisyui: {},
+  plugins: [require('daisyui'), require('tailwind-scrollbar'), require('@tailwindcss/aspect-ratio')],
 };
