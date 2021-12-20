@@ -11,10 +11,7 @@ const Layout = ({ children }) => {
       </Head>
 
       <Navbar title="Next Image Gallery" />
-      <div className="flex">
-        <Sidebar />
-        {children}
-      </div>
+      {children}
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { BsCloudUpload } from 'react-icons/bs';
-import { AiOutlineEye } from 'react-icons/ai';
+import { FaGithub } from 'react-icons/fa';
 import { RiHashtag } from 'react-icons/ri';
 
 const Sidebar = () => {
@@ -17,8 +17,13 @@ const Sidebar = () => {
           </a>
         </li>
         <li>
-          <a className="hover:text-secondary">
-            <AiOutlineEye size="1.5rem" />{' '}
+          <a
+            href="https://github.com/"
+            target="_blank"
+            rel="noopner noreferrer"
+            className="hover:text-secondary"
+          >
+            <FaGithub size="1.5rem" />
           </a>
         </li>
       </ul>
