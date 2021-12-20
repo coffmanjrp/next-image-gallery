@@ -14,13 +14,15 @@ import { toast } from 'react-toastify';
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
-  const { name, email, password } = formData;
+  const { name, email, password, confirmPassword } = formData;
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -32,6 +34,11 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return false;
+    }
 
     try {
       const auth = getAuth(app);
@@ -108,6 +115,32 @@ const SignUpPage = () => {
                 onClick={() => setShowPassword((prevState) => !prevState)}
               >
                 {showPassword ? (
+                  <AiOutlineEye size="2rem" />
+                ) : (
+                  <AiOutlineEyeInvisible size="2rem" />
+                )}
+              </button>
+            </div>
+            <div className="relative">
+              <label className="input-group input-group-vertical input-group-md">
+                <span>Confirm Password</span>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirmPassword"
+                  className="input input-bordered input-md"
+                  autoComplete="off"
+                  value={confirmPassword}
+                  onChange={handleChange}
+                />
+              </label>
+              <button
+                type="button"
+                className="btn btn-ghost absolute top-1/3 right-1"
+                onClick={() =>
+                  setShowConfirmPassword((prevState) => !prevState)
+                }
+              >
+                {showConfirmPassword ? (
                   <AiOutlineEye size="2rem" />
                 ) : (
                   <AiOutlineEyeInvisible size="2rem" />
