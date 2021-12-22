@@ -3,9 +3,12 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
+      "@/atoms/*": ["atoms/*"],
       "@/components/*": ["components/*"],
+      "@/firebase/*": ["firebase/*"],
       "@/hooks/*": ["hooks/*"],
-      "@/firebase/*": ["firebase/*"]
+      "@/styles/*": ["styles/*"],
+      "@/utils/*": ["utils/*"]
     }
   }
 }

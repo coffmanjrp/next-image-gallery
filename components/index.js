@@ -1,3 +1,4 @@
+export { default as CreateGalleryItemModal } from './CreateGalleryItemModal';
 export { default as Gallery } from './Gallery';
 export { default as GalleryItem } from './GalleryItem';
 export { default as Layout } from './Layout';
