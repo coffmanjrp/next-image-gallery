@@ -1,61 +1,82 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { getAuth } from 'firebase/auth';
-import { app } from '@/firebase/config';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { app, db } from '@/firebase/config';
 import { AiOutlinePlus, AiOutlineClose } from 'react-icons/ai';
 import { fileDataState } from '@/atoms/dataAtom';
+import { showModalState } from '@/atoms/uiAtom';
+import { useDropzoneProps } from '@/hooks/index';
+
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+} from 'firebase/firestore';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'react-toastify';
 
 const CreateGalleryItemModal = () => {
-  const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    fileName: '',
+    file: null,
+    name: '',
     username: '',
     isPublic: true,
     tag: '',
     tags: [],
   });
-  const { fileName, username, isPublic, tag, tags } = formData;
+  const { file, name, username, isPublic, tag, tags } = formData;
   const modalRef = useRef();
   const [fileData, setFileData] = useRecoilState(fileDataState);
+  const [showModal, setShowModal] = useRecoilState(showModalState);
   const auth = getAuth(app);
+  const { data, getRootProps, getInputProps, isDragAccept, isDragReject } =
+    useDropzoneProps();
 
   useEffect(() => {
+    if (data) setFileData(data);
+
     if (fileData) {
       setShowModal(true);
       setFormData({
         ...formData,
-        fileName: fileData?.name,
+        file: fileData,
+        name: fileData.file.name.replace(/\.[^/.]+$/, ''),
         username: auth.currentUser?.displayName,
       });
     }
 
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileData]);
-
-  const handleClick = (e) => {
-    if (modalRef.current && !modalRef.current.contains(e.target)) {
-      handleClose();
-    }
-  };
+  }, [data, fileData, setFileData]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
+    if (e.target.files) {
+      setFormData({
+        ...formData,
+        file: e.target.file,
+      });
+    }
 
-  const handleToggleButton = () => {
-    setFormData((prevState) => ({
-      ...formData,
-      isPublic: !prevState.isPublic,
-    }));
+    if (e.target.type === 'text') {
+      setFormData({
+        ...formData,
+        [e.target.id]: e.target.value,
+      });
+    }
+
+    if (e.target.id === 'isPublic') {
+      setFormData({
+        ...formData,
+        isPublic: !isPublic,
+      });
+    }
   };
 
   const removeTag = (index) => {
@@ -68,12 +89,70 @@ const CreateGalleryItemModal = () => {
   const handleClose = () => {
     setShowModal(false);
     setFormData({
-      fileName: '',
+      file: null,
+      name: '',
       username: '',
       isPublic: true,
       tag: '',
       tags: [],
     });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const storeFile = async (file) => {
+      return new Promise((resolve, reject) => {
+        const storage = getStorage();
+        const filename = `${name}-${uuidv4()}`;
+        const storageRef = ref(storage, `images/${filename}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+            switch (snapshot.state) {
+              case 'paused':
+                console.log('Upload is paused');
+                break;
+              case 'running':
+                console.log('Upload is running');
+                break;
+              default:
+                break;
+            }
+          },
+          (error) => {
+            reject(error);
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve(downloadURL);
+            });
+          }
+        );
+      });
+    };
+
+    const url = await storeFile(formData.file.file);
+
+    const newFormData = {
+      ...formData,
+      url,
+      createdAt: serverTimestamp(),
+    };
+    delete newFormData.file;
+    delete newFormData.tag;
+
+    console.log(newFormData);
+
+    await setDoc(doc(db, 'images', auth.currentUser?.uid), newFormData);
+
+    toast.success('Successfully uploaded');
+    handleClose();
   };
 
   return (
@@ -89,13 +168,28 @@ const CreateGalleryItemModal = () => {
         >
           <AiOutlineClose size="1.5rem" />
         </button>
-        <div className="relative flex-1 w-[calc(100vw-600px)] ">
+        <div
+          {...getRootProps({
+            className: `relative flex-1 w-[calc(100vw-600px)] focus:outline-none border-2 ${
+              isDragAccept
+                ? 'border-secondary shadow-inner shadow-secondary'
+                : 'border-transparent'
+            } 
+         ${isDragReject && 'border-error shadow-inner shadow-error'}
+         `,
+          })}
+        >
+          <input {...getInputProps()} />
           <div className="flex justify-center items-center h-full overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-            <img src={fileData?.base64} alt={fileData?.name} />
+            {file ? (
+              <img src={file.base64} alt={name} />
+            ) : (
+              <p className="text-lg">Drop file here!</p>
+            )}
           </div>
         </div>
         <div className="divider divider-vertical"></div>
-        <form className="w-[500px]">
+        <form className="w-[500px]" onSubmit={handleSubmit}>
           <div className="form-control h-full pt-[50px] pb-[20px] px-[40px]">
             <label className="label">
               <span className="label-text">File Name</span>
@@ -103,9 +197,9 @@ const CreateGalleryItemModal = () => {
             <div className="mb-4 pb-[5px] border-b-2 border-gray-400">
               <input
                 type="text"
-                id="fileName"
+                id="name"
                 className="w-full bg-transparent text-xl border-none focus:outline-none"
-                value={fileName}
+                value={name}
                 onChange={handleChange}
               />
             </div>
@@ -128,9 +222,10 @@ const CreateGalleryItemModal = () => {
               </label>
               <input
                 type="checkbox"
+                id="isPublic"
                 className="toggle"
                 checked={isPublic}
-                onClick={handleToggleButton}
+                onChange={handleChange}
               />
             </div>
             <div className="flex-1">
@@ -169,9 +264,7 @@ const CreateGalleryItemModal = () => {
                     key={index}
                     onClick={() => removeTag(index)}
                   >
-                    <div className="badge badge-error badge-outline badge-lg">
-                      # {tag}
-                    </div>
+                    <div className="badge badge-outline badge-lg"># {tag}</div>
                   </button>
                 ))}
               </div>

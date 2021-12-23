@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
 export const fileDataState = atom({
-  key: 'fileState',
+  key: 'fileDataState',
   default: null,
 });

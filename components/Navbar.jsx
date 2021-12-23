@@ -45,23 +45,21 @@ const Navbar = ({ title }) => {
           </a>
         </Link>
       </div>
-      {auth.currentUser && (
-        <div className="flex-1 mx-2 md:mx-6">
-          <div className="form-control flex-row w-full">
-            <input
-              type="text"
-              placeholder="Search"
-              className="input input-ghost w-full"
-            />
-            <button
-              type="submit"
-              className="btn btn-square btn-ghost hidden md:flex"
-            >
-              <AiOutlineSearch size="1.5rem" />
-            </button>
-          </div>
+      <div className="flex-1 mx-2 md:mx-6">
+        <div className="form-control flex-row w-full">
+          <input
+            type="text"
+            placeholder="Search"
+            className="input input-ghost w-full"
+          />
+          <button
+            type="submit"
+            className="btn btn-square btn-ghost hidden md:flex"
+          >
+            <AiOutlineSearch size="1.5rem" />
+          </button>
         </div>
-      )}
+      </div>
       <div ref={themeMenuRef} className="relative">
         <button
           type="button"
@@ -72,18 +70,16 @@ const Navbar = ({ title }) => {
         </button>
         <ThemeMenu {...{ showThemeMenu, setShowThemeMenu }} />
       </div>
-      {auth.currentUser && (
-        <button className="btn btn-square btn-ghost" onClick={handleLogout}>
-          <div className="avatar placeholder">
-            <div className="bg-neutral-focus text-neutral-content rounded-full w-10 h-10">
-              <span>
-                {auth.currentUser &&
-                  auth.currentUser.displayName.charAt(0).toUpperCase()}
-              </span>
-            </div>
+      <button className="btn btn-square btn-ghost" onClick={handleLogout}>
+        <div className="avatar placeholder">
+          <div className="bg-neutral-focus text-neutral-content rounded-full w-10 h-10">
+            <span>
+              {auth.currentUser &&
+                auth.currentUser.displayName.charAt(0).toUpperCase()}
+            </span>
           </div>
-        </button>
-      )}
+        </div>
+      </button>
     </div>
   );
 };

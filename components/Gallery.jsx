@@ -1,14 +1,14 @@
-import { useCallback } from 'react';
+import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import Masonry from 'react-masonry-css';
-import { useDropzone } from 'react-dropzone';
 import { fileDataState } from '@/atoms/dataAtom';
 import { GalleryItem, Spinner } from '@/components/index';
-import { useFirestore } from '@/hooks/index';
-import { readFile } from '@/utils/fileHelpers';
+import { useDropzoneProps, useFirestore } from '@/hooks/index';
 
 const Gallery = () => {
   const [fileData, setFileData] = useRecoilState(fileDataState);
+  const { data, getRootProps, getInputProps, isDragAccept, isDragReject } =
+    useDropzoneProps();
   const [docs, loading, error] = useFirestore('images');
   const breakpoints = {
     default: 7,
@@ -17,33 +17,9 @@ const Gallery = () => {
     640: 2,
   };
 
-  const onDrop = useCallback(
-    async (acceptedFiles) => {
-      const data = await readFile(acceptedFiles[0]);
-
-      const file = await acceptedFiles.map((file) => ({
-        base64: data,
-        path: file.path,
-        name: file.name.replace(/\.[^/.]+$/, ''),
-        size: file.size,
-        type: file.type,
-        preview: URL.createObjectURL(file),
-      }));
-
-      setFileData(file[0]);
-    },
-    [setFileData]
-  );
-
-  const { getRootProps, getInputProps, isDragAccept, isDragReject } =
-    useDropzone({
-      accept: 'image/*',
-      multiple: false,
-      noClick: true,
-      minSize: 0,
-      maxSize: 5242880,
-      onDrop,
-    });
+  useEffect(() => {
+    if (data) setFileData(data);
+  }, [data, fileData, setFileData]);
 
   if (loading) {
     return <Spinner />;
