@@ -25,6 +25,8 @@ const Gallery = () => {
     return <Spinner />;
   }
 
+  console.log(docs);
+
   return (
     <div
       {...getRootProps({
@@ -40,7 +42,7 @@ const Gallery = () => {
       <input {...getInputProps()} />
       <Masonry
         breakpointCols={breakpoints}
-        className=" flex ml-[-0.375rem] w-auto"
+        className="flex ml-[-0.375rem] w-auto"
         columnClassName="pl-3 bg-clip-padding"
       >
         {docs && docs.map((doc) => <GalleryItem key={doc.id} doc={doc} />)}
