@@ -13,7 +13,7 @@ function MyApp({ Component, pageProps }) {
         enableColorScheme={false}
       >
         <Component {...pageProps} />
-        <ToastContainer />
+        <ToastContainer pauseOnFocusLoss={false} />
       </ThemeProvider>
     </RecoilRoot>
   );

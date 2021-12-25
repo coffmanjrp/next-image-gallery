@@ -21,7 +21,7 @@ const useDropzoneProps = () => {
 
   const { getRootProps, getInputProps, isDragAccept, isDragReject } =
     useDropzone({
-      accept: 'image/*',
+      accept: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'],
       multiple: false,
       noClick: true,
       minSize: 0,

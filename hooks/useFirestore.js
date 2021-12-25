@@ -9,7 +9,11 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/firebase/config';
 
+import { useRecoilValue } from 'recoil';
+import { uploadedState } from '@/atoms/dataAtom';
+
 const useFirestore = (name, option) => {
+  const uploaded = useRecoilValue(uploadedState);
   const [docs, setDocs] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,13 +23,11 @@ const useFirestore = (name, option) => {
   const orderByOpt = option?.orderBy
     ? orderBy(option.orderBy[0], option.orderBy[1])
     : orderBy('createdAt', 'desc');
-  const limitOpt = option?.limit ? limit(option.limit) : limit(10);
+  const limitOpt = option?.limit ? limit(option.limit) : limit(100);
 
   useEffect(() => {
     fetchData();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, option]);
+  }, [uploaded]);
 
   const fetchData = async () => {
     try {

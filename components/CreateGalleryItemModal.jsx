@@ -5,25 +5,41 @@ import { AiOutlinePlus, AiOutlineClose } from 'react-icons/ai';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { app, db } from '@/firebase/config';
-import { fileDataState } from '@/atoms/dataAtom';
+import {
+  fileDataState,
+  isLoadingState,
+  progressState,
+  uploadedState,
+} from '@/atoms/dataAtom';
 import { showModalState } from '@/atoms/uiAtom';
-import { useAddFileToStorage, useDropzoneProps } from '@/hooks/index';
+import { useDropzoneProps } from '@/hooks/index';
+
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 const CreateGalleryItemModal = () => {
   const [formData, setFormData] = useState({
     file: null,
-    name: '',
+    title: '',
     username: '',
-    isPublic: true,
+    isPublic: false,
     tag: '',
     tags: [],
   });
-  const { file, name, username, isPublic, tag, tags } = formData;
+  const { file, title, username, isPublic, tag, tags } = formData;
   const modalRef = useRef();
-  const [fileData, setFileData] = useRecoilState(fileDataState);
   const [showModal, setShowModal] = useRecoilState(showModalState);
+  const [fileData, setFileData] = useRecoilState(fileDataState);
+  const [uploaded, setUploaded] = useRecoilState(uploadedState);
+  const [progress, setProgress] = useRecoilState(progressState);
+  const [isLoading, setIsLoading] = useRecoilState(isLoadingState);
   const auth = getAuth(app);
-  const { progress, url, loading, error } = useAddFileToStorage(file, name);
+
   const { data, getRootProps, getInputProps, isDragAccept, isDragReject } =
     useDropzoneProps();
 
@@ -35,7 +51,7 @@ const CreateGalleryItemModal = () => {
       setFormData({
         ...formData,
         file: fileData,
-        name: fileData.file.name.replace(/\.[^/.]+$/, ''),
+        title: fileData.file.name.replace(/\.[^/.]+$/, ''),
         username: auth.currentUser?.displayName,
       });
     }
@@ -77,9 +93,9 @@ const CreateGalleryItemModal = () => {
     setShowModal(false);
     setFormData({
       file: null,
-      name: '',
+      title: '',
       username: '',
-      isPublic: true,
+      isPublic: false,
       tag: '',
       tags: [],
     });
@@ -87,6 +103,48 @@ const CreateGalleryItemModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    const storeFile = async (file) => {
+      return new Promise((resolve, reject) => {
+        const storage = getStorage();
+        const filename = `${title}-${uuidv4()}`;
+        const storageRef = ref(storage, `images/${filename}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setProgress(progress);
+
+            console.log('Upload is ' + progress + '% done');
+            switch (snapshot.state) {
+              case 'paused':
+                console.log('Upload is paused');
+                break;
+              case 'running':
+                console.log('Upload is running');
+                break;
+              default:
+                break;
+            }
+          },
+          (error) => {
+            reject(error);
+            toast.error(error.message);
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve(downloadURL);
+            });
+          }
+        );
+      });
+    };
+
+    const url = await storeFile(file.file);
 
     const { uid } = auth.currentUser;
     const newFormData = {
@@ -98,15 +156,13 @@ const CreateGalleryItemModal = () => {
     delete newFormData.file;
     delete newFormData.tag;
 
-    console.log(newFormData);
-
     await addDoc(collection(db, 'images'), newFormData);
 
+    setIsLoading(false);
+    setUploaded(true);
     toast.success('Successfully uploaded');
     handleClose();
   };
-
-  console.log(file);
 
   return (
     <div className={`modal ${showModal ? 'modal-open' : ''}`}>
@@ -135,7 +191,7 @@ const CreateGalleryItemModal = () => {
           <input {...getInputProps()} />
           <div className="flex justify-center items-center h-full overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             {file ? (
-              <img src={file.base64} alt={name} />
+              <img src={file.base64} alt={title} />
             ) : (
               <p className="text-lg">Drop file here!</p>
             )}
@@ -150,15 +206,15 @@ const CreateGalleryItemModal = () => {
             <div className="mb-4 pb-[5px] border-b-2 border-gray-400">
               <input
                 type="text"
-                id="name"
+                id="title"
                 className="w-full bg-transparent text-xl border-none focus:outline-none"
-                value={name}
+                value={title}
                 onChange={handleChange}
               />
             </div>
             <div className="mb-4">
               <label className="label">
-                <span className="label-text">Owner Name</span>
+                <span className="label-text">Posted by</span>
               </label>
               <input
                 type="text"
@@ -167,6 +223,7 @@ const CreateGalleryItemModal = () => {
                 placeholder="Type user name here"
                 value={username}
                 onChange={handleChange}
+                disabled
               />
             </div>
             <div>
@@ -226,7 +283,7 @@ const CreateGalleryItemModal = () => {
               <button
                 type="submit"
                 className={`btn btn-primary uppercase ${
-                  loading ? 'loading' : ''
+                  isLoading ? 'loading' : ''
                 }`}
               >
                 Submit
