@@ -191,7 +191,7 @@ const CreateGalleryItemModal = () => {
           <input {...getInputProps()} />
           <div className="flex justify-center items-center h-full overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             {file ? (
-              <img src={file.base64} alt={title} />
+              <img src={file.preview} alt={title} />
             ) : (
               <p className="text-lg">Drop file here!</p>
             )}

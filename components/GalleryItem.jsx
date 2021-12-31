@@ -14,7 +14,7 @@ const GalleryItem = ({ doc }) => {
       <img
         src={doc.url}
         alt={doc.title}
-        className="border-2 border-secondary hover:border-primary hover:shadow-lg hover:scale-105 rounded transition-all duration-300 ease-in-out"
+        className="non-draggable border-2 border-secondary hover:border-primary hover:shadow-lg hover:scale-105 rounded transition-all duration-300 ease-in-out"
       />
       <figcaption className="text-center text-base-content">
         {doc.title.slice(0, 20)}

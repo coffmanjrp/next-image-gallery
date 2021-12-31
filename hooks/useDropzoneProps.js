@@ -7,10 +7,10 @@ const useDropzoneProps = () => {
 
   const onDrop = useCallback(
     async (acceptedFiles) => {
-      const data = await readFile(acceptedFiles[0]);
+      // const data = await readFile(acceptedFiles[0]);
 
       const file = await acceptedFiles.map((file) => ({
-        base64: data,
+        preview: URL.createObjectURL(file),
         file,
       }));
 
@@ -21,7 +21,14 @@ const useDropzoneProps = () => {
 
   const { getRootProps, getInputProps, isDragAccept, isDragReject } =
     useDropzone({
-      accept: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'],
+      accept: [
+        'image/png',
+        'image/jpeg',
+        'image/jpg',
+        'image/gif',
+        'image/svg',
+        'image/tiff',
+      ],
       multiple: false,
       noClick: true,
       minSize: 0,
