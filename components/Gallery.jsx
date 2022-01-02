@@ -39,8 +39,6 @@ const Gallery = () => {
     return <Spinner />;
   }
 
-  console.log(docsData);
-
   return (
     <div
       {...getRootProps({

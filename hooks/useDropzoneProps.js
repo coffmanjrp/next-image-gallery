@@ -1,14 +1,11 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { readFile } from '@/utils/fileHelpers';
 
 const useDropzoneProps = () => {
   const [fileData, setFileData] = useState(null);
 
   const onDrop = useCallback(
     async (acceptedFiles) => {
-      // const data = await readFile(acceptedFiles[0]);
-
       const file = await acceptedFiles.map((file) => ({
         preview: URL.createObjectURL(file),
         file,
