@@ -3,7 +3,6 @@ import { useRecoilState } from 'recoil';
 import { toast } from 'react-toastify';
 import { AiOutlinePlus, AiOutlineClose } from 'react-icons/ai';
 import { getAuth } from 'firebase/auth';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { app, db } from '@/firebase/config';
 import {
   fileDataState,
@@ -14,13 +13,7 @@ import {
 import { showModalState } from '@/atoms/uiAtom';
 import { useDropzoneProps } from '@/hooks/index';
 
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
+import { createItem } from '@/firebase/db';
 
 const CreateGalleryItemModal = () => {
   const [formData, setFormData] = useState({
@@ -105,59 +98,7 @@ const CreateGalleryItemModal = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const storeFile = async (file) => {
-      return new Promise((resolve, reject) => {
-        const storage = getStorage();
-        const filename = `${title}-${uuidv4()}`;
-        const storageRef = ref(storage, `images/${filename}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setProgress(progress);
-
-            console.log('Upload is ' + progress + '% done');
-            switch (snapshot.state) {
-              case 'paused':
-                console.log('Upload is paused');
-                break;
-              case 'running':
-                console.log('Upload is running');
-                break;
-              default:
-                break;
-            }
-          },
-          (error) => {
-            reject(error);
-            toast.error(error.message);
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              resolve(downloadURL);
-            });
-          }
-        );
-      });
-    };
-
-    const url = await storeFile(file.file);
-
-    const { uid } = auth.currentUser;
-    const newFormData = {
-      ...formData,
-      url,
-      userId: uid,
-      createdAt: serverTimestamp(),
-    };
-    delete newFormData.file;
-    delete newFormData.tag;
-
-    await addDoc(collection(db, 'images'), newFormData);
-
+    createItem(formData, file.file, title);
     setIsLoading(false);
     setUploaded(true);
     toast.success('Successfully uploaded');

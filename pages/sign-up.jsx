@@ -2,13 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from 'firebase/auth';
-import { setDoc, doc, serverTimestamp, FieldValue } from 'firebase/firestore';
-import { app, db } from '@/firebase/config';
+import { createUser } from '@/firebase/db';
 import { Layout } from '@/components/index';
 import { toast } from 'react-toastify';
 
@@ -41,24 +35,7 @@ const SignUpPage = () => {
     }
 
     try {
-      const auth = getAuth(app);
-
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      updateProfile(auth.currentUser, {
-        displayName: name,
-      });
-
-      const newFormData = { ...formData };
-      delete newFormData.password;
-      newFormData.createdAt = serverTimestamp();
-
-      await setDoc(doc(db, 'users', user.uid), newFormData);
+      await createUser(formData);
 
       setLoading(true);
 
