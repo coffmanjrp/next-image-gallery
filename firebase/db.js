@@ -4,11 +4,13 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import {
-  getFirestore,
+  doc,
   addDoc,
   setDoc,
-  doc,
+  updateDoc,
+  deleteDoc,
   collection,
+  getFirestore,
   serverTimestamp,
 } from 'firebase/firestore';
 import {
@@ -23,6 +25,7 @@ import { app } from './config';
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
+// Resister User
 export const createUser = async (data) => {
   const userCredential = await createUserWithEmailAndPassword(
     auth,
@@ -42,6 +45,12 @@ export const createUser = async (data) => {
   await setDoc(doc(db, 'users', user.uid), newData);
 };
 
+// Delete User
+export const updateUser = async (uid) => {
+  await deleteDoc(doc(db, 'users', uid));
+};
+
+// Create a Gallery Item
 export const createItem = async (data, file, title) => {
   const url = await storeFile(file, title);
 
@@ -58,6 +67,18 @@ export const createItem = async (data, file, title) => {
   await addDoc(collection(db, 'images'), newData);
 };
 
+// Edit the Gallery Item
+export const updateGalleryItem = async (data, id) => {
+  const docRef = doc(db, 'images', id);
+  await updateDoc(docRef, data);
+};
+
+// Delete the Gallery Item
+export const deleteGalleryItem = async (id) => {
+  await deleteDoc(doc(db, 'images', id));
+};
+
+// Store file to firestore
 export const storeFile = async (file, title) => {
   return new Promise((resolve, reject) => {
     const storage = getStorage();
